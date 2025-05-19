@@ -1,0 +1,92 @@
+mentés ctrl+ x utána y
+
+init 6 teljes ujra inditás
+
+adresses: szerver ip
+nemeservers: addresses: az meg a dns server
+
+gateway ugyan az az ip mint a router
+
+hardware ethernet lekérés (w10-ben, parancssor, getmac)
+
+range-be ha nincs megadva kizárom az első meg utolső 10 mondjuk
+
+authoritative;
+ ddns-update-style none; 
+option domain-name-servers 192.168.1.1;       (wind20129 ip-je)
+option broadcast-address 192.168.1.255;      (/30 akkor akkor 254-1 (a jó 253))
+option routers 192.168.1.1;                                 (router ip)
+option subnet-mask 255.255.255.0;         
+default-lease-time 600; 
+max-lease-time 7200; 
+subnet 192.168.1.0 netmask 255.255.255.0 {      (hálozat neve és maszkja) 
+range 192.168.1.10 192.168.1.100;}                   (meddig osszaki)
+
+
+MAC cím alapján IP-cím kiosztása a kliens gépnek:
+ host kliens1 
+{ hardware ethernet 00:AA:BB:CC:DD:EE;
+fixed-address 192.168.1.101;               (ha nincs leirva akkro olyan legyen ami nincs használva)
+option host-name kliens1;
+
+
+windows 10-ben vagy ubuntuban (cmd) getmac
+
+
+cmd-be 
+ipconfig/release
+ipconfig/renew
+
+
+Ha egy weboldalra kell beirni nevemet vagy dátumot akkor
+mcedit /var/www/html/index.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Windows Server 2019
+-dns
+-reverse loopup zones  
+-new zone  (network id)(subnet 3 oktetje)
+
+utána
+-név.local (bele katintasz)
+(jobb klikk) -new host AAA
+név: Router  ip address: (router ip-je) (PTR PIPÁL BE!!!!!!)
+-ADD HOST
+
+Minden eszközről (ubuntu, win10, saját-local-ról is)
+név.local (bele katintasz) 
+(jobb klikk) -new host AAA
+név: Router  ip address: (router ip-je) (PTR PIPÁL BE!!!!!!)
+-ADD HOST
+
+Win10
+fájlkezelő
+-THIS PC
+-(üres területen properties)
+-change settings
+-change
+-member of (domain) (név.local)
+Administrator / Jelszó
+
+
+
+
