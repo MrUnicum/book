@@ -1,0 +1,287 @@
+1. Lássátok el hosztnevekkel az eszközöket!
+
+en
+conft
+h (name)
+-----------------------------------------
+2. Hozzátok létre az L2-es VLAN-okat a topológia szerint. Először jegyzeteljetek egy
+szövegdobozban, elolvasva ezt a teljes feladatsort! A végfelhasználói csatlakozáshoz
+használt MLSW-ek is L2-ben dolgoznak.
+a. Az 1-10 portok a „kisebb” a 11-15 portok a „nagyobb” VLAN-hoz
+csatlakozzanak!
+b. A trönkportok csak a két VLAN-t engedjék át!
+
+Vlan létrehozás :
+-példa feladat   (sw1 – mlsw1)
+Hozzátok létre az L2-es VLAN-okat a topológia szerint. A végfelhasználói csatlakozáshoz
+használt MLSW-ek is L2-ben dolgoznak.
+a. Az 1-10 portok a „kisebb” a 11-15 portok a „nagyobb” VLAN-hoz csatlakozzanak!
+Switch-ben és multilayer switchben egyaránt!
+3.a
+Switchben:
+
+VLAN 10
+NAME KISEBB
+VLAN 20
+NAME NAGYOBB
+int range fa0/1-10
+switchport mode access
+switchport access vlan 10
+int range fa0/11-15
+switchport mode access
+switchport access vlan 20
+
+MultilayeSwitchben:
+
+VLAN 10
+NAME KISEBB
+VLAN 20
+NAME NAGYOBB
+int range gig1/0/1-10
+switchport access vlan 10
+int range fa1/0/11-15
+switchport mode access
+switchport access vlan 20
+-----------------------------------------
+4.
+A trönkportok csak a két VLAN-t engedjék át!
+A két végfelhasználói SW-ben alakítson ki ETHERCHANNELT LACP protokoll
+segítségével! A portchannelt is trönkölje!
+(Azt amelyek össze vannak kötve.)(pld: sw1: gig0/1-2 össze kötve mlsw gig1/0/23-24)
+
+(Switch)
+3-b-4
+INT range gig0/1-2
+sw mode trunk
+sw trunk allowed vlan 10,20   (megadott vlan)
+channel-group 1 mode active    (az active router lesz a priority 120)
+int port-channel 1
+sw mode trunk
+sw trunk allowed vlan10,20  (megadott vlan)
+
+A router felé menő portot is be kell trunkolni.
+int fa0/24
+sw mode trunk
+sw trunk allowed vlan 10,20   (megadott vlan)
+
+(Mlsw)
+3.b-4
+INT range gig1/0/23-24
+sw mode trunk
+sw trunk allowed vlan 10,20   (megadott vlan)
+channel-group 1 mode passive  (az active router lesz a priority 110)
+int port-channel 1
+sw mode trunk
+sw trunk allowed vlan10,20   (megadott vlan)
+
+int gig1/0/20 
+sw mode trunk
+sw trunk allowed vlan 10,20   (megadott vlan)
+--------------------------------------------------------------
+5. (PPP) (Routerben) (MIND2 routerben be kell adni)
+A két router közötti Serial kapcsolatban a 2-ik rétegbeli beágyazás PPP legyen! A
+hitelesítés:CHAP jelszó: cisco !
+
+Router:
+R2
+R2(config)#username R2 PASsword CISCO  (megadott JELSZÓ)     (username-nek mindig azt az eszköz nevét kell megadni amelyikkel csatlakozik(pld R1-be irom a ppp akkor username R2 password cisco))
+R2(config)#INTERface SE0/1/0   (megadott port)
+R2(config-if)#ENCAPsulation PPp 
+R2(config-if)#PPP AUThentication CHAp (CHAP-ET csak ha kéri)
+R2(config-if)#IP ADD 10.10.10.2 255.255.255.252              (Megadott ip, irja a feladat melyik a kisebb és nagyobb)
+--------------------------------------------------------
+7. 
+A routerekben valósítson meg” router on a stick”, tehát alinterfészes csatlakozást a két
+VLAN alhálózatnak! (mind2 routerbe de külömbözik)
+
+Egyik router: Feladat irja, hogy melyiknek kell a 10-es és melyiknek a 11-est beadni.
+Itt a példa:(a. Az alinterfészek IP-címei: a SWITCH felé csatlakozó alinterfészek a 10.
+VLAN címet, az MLSW-ek felé csatlakozó a 11. IP-címet kapják.) 
+
+R1(config)#int gig0/0/1  (Az a port amelyik switchbe vagy mlsw-be megy.)
+R1(config-if)#no sh
+R1(config-if)#int gig0/0/1.10
+R1(config-subif)#encapsulation dot1Q 10  (megvan adva hogy 10 vayg 20 legyen vagy bármi más)
+R1(config-subif)#ip add 192.168.10.10 255.255.255.128    (meg van adva hogy 10 vagy 11 legyne)( Az alinterfészek IP-címei: a SWITCH felé csatlakozó alinterfészek a 10.
+VLAN címet, az MLSW-ek felé csatlakozó a 11. IP-címet kapják.) )
+
+R1(config-subif)#ex
+R1(config)#int gig0/0/1.20
+R1(config-subif)#no sh
+R1(config-subif)#encapsulation dot1Q 20             (megvan adva hogy 10 vayg 20 legyen vagy bármi más(vlan cimnek is irhatja))
+R1(config-subif)#ip add 192.168.20.10 255.255.255.192    (meg van adva hogy 10 vagy 11 legyne)( Az alinterfészek IP-címei: a SWITCH felé csatlakozó alinterfészek a 10.
+VLAN címet, az MLSW-ek felé csatlakozó a 11. IP-címet kapják.) )
+
+Másik router:
+Példa: másik routerben ip add-nake  (192.168.10.10 után a 192.168.10.11-et kell megadni, vagyisa következő cimet)
+
+Feladat irja, hogy melyiknek kell a 10-es és melyiknek a 11-est beadni.
+Itt a példa:(a. Az alinterfészek IP-címei: a SWITCH felé csatlakozó alinterfészek a 10.
+VLAN címet, az MLSW-ek felé csatlakozó a 11. IP-címet kapják.)
+
+R2(config)#int gig0/0/1
+R2(config-if)#no sh
+R2(config-if)#int gig0/0/1.10
+R2(config-subif)#encapsulation dot1Q 10                 (megvan adva hogy 10 vayg 20 legyen vagy bármi más)
+R2(config-subif)#ip add 192.168.10.11 255.255.255.128    (11 mert a feladat azt irja hogy a mlsw fele a 11 legyne)
+R2(config-subif)#ex
+R2(config)#int gig0/0/1.20
+R2(config-subif)#no sh
+R2(config-subif)#encapsulation dot1Q 20                (megvan adva hogy 10 vayg 20 legyen vagy bármi más)
+R2(config-subif)#ip add 192.168.20.11 255.255.255.192
+ 
+-------------------------------------------------------------------
+8. Valósítson meg OSPF forgalomirányítást 10-es azonosítóval és 0-ás
+területazonosítóval
+d. passziválja a megfelelő interfészeket!
+
+(Minden routerbe kell)(forditot maszk 255-kivonom a megadott /30-at pld és igy lesz (/30, 255-252=3))
+
+OSPF
+(Mind2 routernek ugyan azt kell beadni csak a router-id külömbözzön.)
+R1 router ospf 10
+router-id 1.1.1.1   (Az legyen az 1.1.1.1 amelyik a DR(Designated router )szerepet kapja)-(A routerekben külömbözött kell megadni)
+R1(config-router)#network 192.168.10.0 0.0.0.127 area 0
+R1(config-router)#network 192.168.20.0 0.0.0.63 area 0
+R1(config-router)#network 10.10.10.0 0.0.0.3 area 0
+R1(config-router)#network 172.16.16.0 0.0.0.3 area 0
+R1(config-router)#passsive-interface gig0/0/1 (azt a portot ami a routerből a switchbe megy)
+ 
+
+
+----------------------------------------------------------
+9. DHCP kiszolgálás:
+f. A kiszolgáló legyen a SWICH-hez csatlakozó router
+g. Mindkét VLAN-t szolgálja ki!
+h. Alapértelmezett átjáró: a VLAN-ok virtuális IP-címe
+i. DNS-server: 8.8.8.8
+
+fel9:(dhcp)  Dhcp-t abba a routerbe kell kiadni amit megad a feladat.
+
+R1(config)#ip dhcp excluded-address 192.168.10.1 192.168.10.10       (azért 10 mert a feladat ezt irta(Első 10 IP nem kiosztva/kioszható))
+R1(config)#ip dhcp excluded-address 192.168.20.1 192.168.20.10
+R1(config)#ip dhcp pool kisebb                           (Meg lesz adva mi a dhcp-k neve.(legóhet hogy ugyan az lesz mint a vlanoké (ezért kisebb és nagyobb)))
+R1(dhcp-config)#network 192.168.10.0 255.255.255.128
+R1(dhcp-config)#default-router 192.168.10.5      (Azért 5 mert a szövegben az volt, hogy (HSRP VIRTUÁLIS IP 5.(hsrp virtuális ip)))
+R1(dhcp-config)#dns-server 8.8.8.8
+R1(dhcp-config)#ip dhcp pool nagyobb
+R1(dhcp-config)#network 192.168.20.0 255.255.255.192
+R1(dhcp-config)#default-router 192.168.20.5           (Azért 5 mert a szövegben az volt, hogy (HSRP VIRTUÁLIS IP 5.(hsrp virtuális ip)))
+R1(dhcp-config)#dns-server 8.8.8.8
+R1(dhcp-config)#
+-----------------------------------------------------------
+10. A két router helyettesítheti egymást:
+j. A SWITCH felé csatlakozó legyen az aktív. Gondoskodjon róla, hogy minden
+VLAN esetén működjön a helyettesítés! Az említett router egy esetleges kiesés
+esetén kérje vissza az elsődleges szerepét, ha újra működőképes lesz!
+k. Virtuális IP címnek az 5. IP-címet használja!
+
+(mind2 routeben meg kell adni)
+HSRP (GIG0/0/1.20)
+(.10 és .20 is mind2-re be kell)
+
+Egyik router: (Active)
+
+R2(config-router)#INT GIG0/0/1.10
+R2(config-subif)#STandby 10(ahányas vlan) ip 192.168.10(vlan száma).5
+R2(config-subif)#standby 10(ahányas vlan) priority 120           (az active router lesz a priority 110((az a standby)ezt a feladat elején kellet beadni))
+R2(config-subif)#standby 10(ahányas vlan) preempt 
+R2(config-subif)#ex
+
+R1(config)#int gig0/0/1.20
+R1(config-subif)#standby 20(ahányas vlan) ip 192.168.20(vlan száma).5        (az active router lesz a priority 120 ((ez az active)ezt a feladat elején kellet beadni))
+R1(config-subif)#standby 20(ahányas vlan) priority 120
+R1(config-subif)#standby 20(ahányas vlan) preempt          (A preempt-et abba a routerbe kell beirni amelyik az active lesz.(A másik routerbe nem kell))
+
+
+Standby / passive router
+
+
+R1(config)#int gig0/0/1.10
+R1(config-subif)#standby 10(ahányas vlan) ip 192.168.10(vlan száma).5        (az active router lesz a priority 120 ((ez az active)ezt a feladat elején kellet beadni))
+R1(config-subif)#standby 10(ahányas vlan) priority 110
+
+R1(config)#int gig0/0/1.20
+R1(config-subif)#standby 20(ahányas vlan) ip 192.168.20(vlan száma).5        (az active router lesz a priority 120 ((ez az active)ezt a feladat elején kellet beadni))
+R1(config-subif)#standby 20(ahányas vlan) priority 110
+ 
+
+
+--------------------------------------------------------------
+11. Portvédelem: A trönk portokon kívül minden portra végezze el:
+a. két(2!!!) MAC address-t engedélyezzen, valamint további behatolás esetén
+regisztrálja, de ne kapcsolja le a portokat!
+
+Portvédelmet switchbe és multilayerbe is be kell adni.
+
+SW1: FELADAT 11:   (HA van a topologiában mind a routerben és multilayerswitchben megg kell csinálni.)vlan 70
+Ezt mind switchben és multilayer switchben is.
+
+SW1(config)#int range fa0/1-23                 vagy mlsw-ben  int range gig1/0/1-19,21-22,(int range gig 1/1/1-4)  (Azokat nem kell a range be rakni amelyek használva vannak a swichek között)
+SW1(config-if-range)#switchport port-security 
+SW1(config-if-range)#switchport port-security maximum 2  (azért kettő mert 2-őt kért a feladat)
+SW1(config-if-range)#switchport port-security violation restrict 
+
+
+
+Show parancsok:
+
+show run   ()
+show vlan
+show ip route (minden eszközön)
+show etherchannel (mind a két eszközön)
+show etherchannel summary (mind a két eszközön)
+show standby brief
+show ip dhcp pool
+
+
+Mask cheat sheet
+https://www.aelius.com/njh/subnet_sheet.html
+
+
+
+📍 Címek és jelentéseik
+1. Address: 192.168.10.1
+Ez az IP-cím, amit az adott eszköz (pl. számítógép, router) használ a hálózaton belül.
+
+Binárisan: 11000000.10101000.00001010.00000001
+
+2. Netmask: 255.255.255.0 = /24
+Ez a hálózati maszk, amely meghatározza, hogy az IP-cím mely része a hálózat és melyik a host (eszköz) része.
+
+/24 azt jelenti, hogy az első 24 bit a hálózati rész, tehát az utolsó 8 bit az egyes eszközök azonosítására szolgál.
+
+Binárisan: 11111111.11111111.11111111.00000000
+
+3. Wildcard: 0.0.0.255
+Ez a netmask ellentéte. Gyakran használják tűzfalaknál, hozzáférésvezérlésnél.
+
+Jelzi, hogy az utolsó 8 bit (1 byte) változhat, azaz a hostcímek ezen a részen térnek el egymástól.
+
+Binárisan: 00000000.00000000.00000000.11111111
+
+🧩 Hálózati információk
+4. Network: 192.168.10.0/24
+A hálózat kezdő címe. Ezt nem lehet eszköznek kiosztani.
+
+Ez a cím az összes, ehhez a hálózathoz tartozó IP-cím közös nevezője.
+
+Binárisan: 11000000.10101000.00001010.00000000
+
+5. Broadcast: 192.168.10.255
+Ez az a cím, amelyre küldött adatot minden eszköz megkap a hálózaton belül.
+
+Az utolsó IP-cím a tartományban, nem használható egyedi eszközre.
+
+6. HostMin: 192.168.10.1
+Ez az első IP-cím, amely kiosztható egy eszköznek a hálózaton.
+
+7. HostMax: 192.168.10.254
+Ez az utolsó kiosztható IP-cím a hálózaton.
+
+8. Hosts/Net: 254
+Összesen 254 eszköz kaphat IP-címet ebben a hálózatban.
+
+Kiszámítás: 2^8 - 2 = 256 - 2 = 254
+(a -2 a hálózati és a broadcast cím miatt van)
+

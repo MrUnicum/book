@@ -1,0 +1,38 @@
+
+Ha Iaas szolgáltatást kell létrehozni (virtuális gép) EC2.
+Pem kapcsoalt: 
+- Connect
+- SSH client
+-(Example másolása)
+
+Utána
+Parancssor
+(Pem mappa elérése (navigálás))
+
+Példa: cd  C:\Users\Czakó Tibor\Documents\tanulos         (cd mindig kell)
+Utána kell az example-t beileszteni:
+Utána:  sudo -i
+
+Paas:
+
+legörgetsz
+security gorup rules
+edit
+inbound rules
+edit inbound rules
+ all icmp ipv4  anywhere-icmpv 4  0.0.0.0/0
+
+utána:
+
+AWS terminálba:
+mysql -h (endpoint) -u admin -p
+
+E:\XAMP\mysql\bin\mysql.exe -h vizsgadb.cxmg6oquuy89.us-east-1.rds.amazonaws.com -u admin -p -P 3306
+			       (vizsgadb.cxmg6oquuy89.us-east-1.rds.amazonaws.com -u admin)(ez az end point)
+Utána jelszó:
+create databases név;
+show databases;
+
+
+
+
